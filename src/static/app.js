@@ -19,23 +19,69 @@ document.addEventListener("DOMContentLoaded", () => {
         activityCard.className = "activity-card";
 
         const spotsLeft = details.max_participants - details.participants.length;
-        const participantsList = details.participants.length > 0
-          ? details.participants.map(p => `<li><span>${p}</span><button class="delete-btn" data-activity="${name}" data-email="${p}" title="Remove participant">✕</button></li>`).join('')
-          : '<li><em>No participants yet</em></li>';
 
+        // Build static structure and then safely insert dynamic content
         activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <h4></h4>
+          <p class="activity-description"></p>
+          <p class="activity-schedule"><strong>Schedule:</strong> <span class="schedule-text"></span></p>
+          <p class="activity-availability"><strong>Availability:</strong> <span class="availability-text"></span></p>
           <div class="participants-section">
             <strong>Participants:</strong>
-            <ul class="participants-list">
-              ${participantsList}
-            </ul>
+            <ul class="participants-list"></ul>
           </div>
         `;
 
+        // Safely set text content for activity details
+        const titleEl = activityCard.querySelector("h4");
+        if (titleEl) {
+          titleEl.textContent = name;
+        }
+
+        const descriptionEl = activityCard.querySelector(".activity-description");
+        if (descriptionEl) {
+          descriptionEl.textContent = details.description;
+        }
+
+        const scheduleTextEl = activityCard.querySelector(".schedule-text");
+        if (scheduleTextEl) {
+          scheduleTextEl.textContent = details.schedule;
+        }
+
+        const availabilityTextEl = activityCard.querySelector(".availability-text");
+        if (availabilityTextEl) {
+          availabilityTextEl.textContent = spotsLeft + " spots left";
+        }
+
+        // Safely populate participants list
+        const participantsListEl = activityCard.querySelector(".participants-list");
+        if (participantsListEl) {
+          if (details.participants.length > 0) {
+            details.participants.forEach(p => {
+              const li = document.createElement("li");
+
+              const span = document.createElement("span");
+              span.textContent = p;
+              li.appendChild(span);
+
+              const button = document.createElement("button");
+              button.className = "delete-btn";
+              button.dataset.activity = name;
+              button.dataset.email = p;
+              button.title = "Remove participant";
+              button.textContent = "✕";
+              li.appendChild(button);
+
+              participantsListEl.appendChild(li);
+            });
+          } else {
+            const li = document.createElement("li");
+            const em = document.createElement("em");
+            em.textContent = "No participants yet";
+            li.appendChild(em);
+            participantsListEl.appendChild(li);
+          }
+        }
         activitiesList.appendChild(activityCard);
 
         // Add option to select dropdown
