@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
         activitySelect.remove(1);
       }
 
+      // Determine current email (used for filtering options)
+      const currentEmail = document.getElementById("email").value.trim().toLowerCase();
+
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
@@ -89,11 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         activitiesList.appendChild(activityCard);
 
-        // Add option to select dropdown
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        activitySelect.appendChild(option);
+        // Add option to select dropdown only if the current email isn't
+        // already in the participant list for this activity.
+        if (!currentEmail || !details.participants.map(p => p.toLowerCase()).includes(currentEmail)) {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          activitySelect.appendChild(option);
+        }
       });
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
@@ -124,6 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
         signupForm.reset();
         // Refresh the activities list to show updated participants
         fetchActivities();
+        // clear the email field after a successful signup so filtering
+        // doesn't keep the just-used address from hiding other activities
+        document.getElementById("email").value = "";
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -185,4 +194,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize app
   fetchActivities();
+
+  // filter dropdown whenever email value changes
+  const emailInput = document.getElementById("email");
+  emailInput.addEventListener("input", () => {
+    fetchActivities();
+  });
 });
